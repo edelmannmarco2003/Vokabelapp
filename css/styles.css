@@ -31,6 +31,7 @@
 }
 
 :root {
+  color-scheme: light;
   /* Aufbau: eine schmale Spalte wie ein Schulheft. Die Karteikarte ist das
      zentrale Objekt, Textmarker-Gelb kennzeichnet schwere Vokabeln. */
   --paper: #f2f4fa;        /* Seitenhintergrund, kühles Heftpapier */

@@ -7,20 +7,39 @@
 (function () {
   'use strict';
 
+  // Dieselbe pdf.js-Version wie in vendor/ (siehe package.json). Wird nur
+  // benutzt, wenn die lokale Datei fehlt oder die Seite mit
+  // <html data-pdfjs="cdn"> ausgeliefert wird (Claude-Artefakt).
+  const CDN = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@6.4.299/legacy/build/';
+
   let loading = null;
+
+  function loadBundle() {
+    return new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = 'vendor/pdfjs/pdf.bundle.js';
+      s.onload = () => (window.pdfjsLib ? resolve(window.pdfjsLib) : reject(new Error('pdfjs-missing')));
+      s.onerror = () => reject(new Error('pdfjs-load'));
+      document.head.appendChild(s);
+    });
+  }
+
+  function loadFromCdn() {
+    return Promise.all([import(CDN + 'pdf.min.mjs'), import(CDN + 'pdf.worker.min.mjs')]).then((mods) => {
+      // Wie im Bündel: pdf.js rechnet im Hauptthread, ohne eigenen Worker.
+      globalThis.pdfjsWorker = mods[1];
+      window.pdfjsLib = mods[0];
+      return mods[0];
+    });
+  }
 
   function loadPdfJs() {
     if (window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
     if (!loading) {
-      loading = new Promise((resolve, reject) => {
-        const s = document.createElement('script');
-        s.src = 'vendor/pdfjs/pdf.bundle.js';
-        s.onload = () => (window.pdfjsLib ? resolve(window.pdfjsLib) : reject(new Error('pdfjs-missing')));
-        s.onerror = () => {
-          loading = null;
-          reject(new Error('pdfjs-load'));
-        };
-        document.head.appendChild(s);
+      const preferCdn = document.documentElement.getAttribute('data-pdfjs') === 'cdn';
+      loading = (preferCdn ? loadFromCdn() : loadBundle().catch(loadFromCdn)).catch(() => {
+        loading = null;
+        throw new Error('pdfjs-load');
       });
     }
     return loading;
