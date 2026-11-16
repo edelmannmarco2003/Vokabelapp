@@ -3,6 +3,7 @@
  *
  * Datenmodell:
  *   { version: 1, seeded: true,
+ *     builtins: [ IDs der eingebauten Listen, die schon angelegt wurden ],
  *     lists: [ { id, name, created, updated,
  *                words: [ { id, en, de, hard } ] } ] }
  */
@@ -40,7 +41,7 @@
       id: safeId(raw.id),
       name: typeof raw.name === 'string' && raw.name.trim() ? raw.name : 'Liste',
       created: Number(raw.created) || Date.now(),
-      updated: Number(raw.updated) || Date.now(),
+      updated: typeof raw.updated === 'number' && isFinite(raw.updated) ? raw.updated : Date.now(),
       words,
     };
   }
@@ -54,6 +55,7 @@
       return {
         version: 1,
         seeded: raw.seeded === true,
+        builtins: Array.isArray(raw.builtins) ? raw.builtins.filter((id) => typeof id === 'string') : [],
         lists: raw.lists.map(sanitizeList).filter(Boolean),
       };
     } catch (err) {

@@ -2,6 +2,8 @@
 
 Englisch-Vokabeln aus einer PDF lernen: PDF hochladen, die erkannten Vokabeln kurz prüfen und dann üben.
 
+Eingebaut ist die Liste „Working in an Agile Team: Daily Stand-up Meetings“ (74 Vokabeln). Weitere eingebaute Listen kommen in `js/builtin-lists.js`.
+
 - **Karteikarten** in beide Richtungen: Deutsch → Englisch und Englisch → Deutsch
 - **Schreibübung**: Das deutsche Wort wird gezeigt, das englische muss getippt werden
 - **Schwere Vokabeln**: mit dem Stern markieren und gesondert üben, pro Liste oder aus allen Listen zusammen
@@ -57,6 +59,7 @@ npm run build:vendor   # vendor/ neu erzeugen (nur nach einem Update von pdf.js 
 | `js/pdf-extract.js` | liest den Text der PDF mit pdf.js |
 | `js/trainer.js` | prüft Antworten, verwaltet die Übungsrunde |
 | `js/store.js` | speichert die Listen im Browser |
+| `js/builtin-lists.js` | fest eingebaute Vokabellisten |
 | `js/app.js` | Oberfläche |
 | `js/cloud.js` | zusätzliche Sicherung, wenn die App als Claude-Artefakt läuft; sonst ohne Wirkung |
 | `vendor/` | pdf.js (Apache-2.0) und die Schriften Atkinson Hyperlegible und Bricolage Grotesque (OFL), Lizenzen liegen bei |

@@ -37,21 +37,16 @@
   }
 
   // Klammern auflösen: "colo(u)r" -> color/colour, "(to) go" -> go/to go,
-  // "child (pl. children)" -> child. Längere Anmerkungen in Klammern
-  // gehören nicht zur verlangten Antwort.
+  // "to gather (feedback)" -> gather / gather feedback.
   function expandParens(s, depth) {
     const m = /\(([^()]*)\)/.exec(s);
     if (!m || depth > 3) return [s.replace(/[()]/g, ' ')];
     const before = s.slice(0, m.index);
     const after = s.slice(m.index + m[0].length);
     const inner = m[1].trim();
-    const attached = /\S$/.test(before) || /^\S/.test(after);
-    const shortWord = /^[A-Za-z']{1,4}$/.test(inner);
-    let out = expandParens(before + after, depth + 1);
-    if (attached || shortWord) {
-      out = out.concat(expandParens(before + inner + after, depth + 1));
-    }
-    return out;
+    // Beides gilt: ohne den Klammerteil und mit ihm
+    // ("to adapt" und "to adapt sth to sth").
+    return expandParens(before + after, depth + 1).concat(expandParens(before + inner + after, depth + 1));
   }
 
   // Mehrere Lösungen in einem Eintrag: "big, large", "autumn/fall".

@@ -44,6 +44,10 @@ test('Klammern: freiwillige Teile und Anmerkungen', () => {
   assert.equal(ok('child', 'child (pl. children)'), true);
   assert.equal(ok('children', 'child (pl. children)'), false);
   assert.equal(ok('flat', 'flat (BE)'), true);
+  assert.equal(ok('to adapt sth to sth', 'to adapt (sth to sth)'), true);
+  assert.equal(ok('adapt', 'to adapt (sth to sth)'), true);
+  assert.equal(ok('gather feedback', 'to gather (feedback)'), true);
+  assert.equal(ok('feedback', 'to gather (feedback)'), false);
 });
 
 test('Lautschrift gehört nicht zur Antwort', () => {

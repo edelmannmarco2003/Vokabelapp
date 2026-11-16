@@ -171,6 +171,19 @@ test('Titelzeile ohne Sprachnamen am Seitenanfang fällt weg', () => {
   ]);
 });
 
+test('wiederholte Kopfzeile mit "Example / note" fällt auf jeder Seite weg', () => {
+  const r = Parser.parseText([
+    'English\tDeutsch\tExample / note',
+    'blocker\tHindernis\tAny blockers?',
+    'English\tDeutsch\tExample / note',
+    'token\tToken\tlogin tokens expire',
+  ].join('\n'));
+  assert.deepEqual(pairsOf(r), [
+    { en: 'blocker', de: 'Hindernis' },
+    { en: 'token', de: 'Token' },
+  ]);
+});
+
 test('scoreLang unterscheidet Deutsch und Englisch', () => {
   assert.ok(Parser.scoreLang('die Umweltverschmutzung') > 0);
   assert.ok(Parser.scoreLang('sich auf etwas freuen') > 0);

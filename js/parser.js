@@ -375,7 +375,11 @@
   const JUNK_CELL = /^(?:\(?\d{1,4}[.)]?|[-–—=:→|•●*·]+)$/;
   const HEAD_EN = /^(?:englisch\w*|english|engl\.?|en|eng)(?![\wäöüß])/i;
   const HEAD_DE = /^(?:deutsch\w*|german|dt\.?|de|ger|deu)(?![\wäöüß])/i;
-  const HEAD_GENERIC = /^(?:vokabel|vokabeln|wort|wörter|word|words|übersetzung|translation|bedeutung|meaning|beispiel|beispielsatz|example|example sentence|nr\.?|no\.?)$/i;
+  const HEAD_TITLE = /^(?:vokabel|vokabeln|wort|wörter|word|words|übersetzung|translation|bedeutung|meaning|beispiel|beispiele|beispielsatz|example|examples|example sentence|note|notes|anmerkung|anmerkungen|bemerkung|bemerkungen|hinweis|hinweise|comment|comments|wortart|part of speech|nr\.?|no\.?)$/i;
+  // "Example / note", "Beispiel & Hinweis": jeder Teil ist ein Spaltentitel.
+  const HEAD_GENERIC = {
+    test: (v) => v.split(/\s*[\/&,+]\s*|\s+(?:and|und|or|oder)\s+/i).every((part) => HEAD_TITLE.test(part.trim())),
+  };
 
   // Spaltentitel sind kurz: "Englisch", "English word", "Deutsche Bedeutung".
   function isHead(re, value) {

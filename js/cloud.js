@@ -44,6 +44,10 @@
     }
   }
 
+  function metaKey(order, builtins) {
+    return order.join(',') + '|' + builtins.join(',');
+  }
+
   async function connect() {
     const user = await window.claude.use('user');
     const db = await window.claude.use('db');
@@ -68,7 +72,8 @@
       }
     });
     remote.forEach((list, id) => inCloud.set(id, list.updated));
-    if (meta && Array.isArray(meta.order)) metaInCloud = meta.order.join(',');
+    const remoteBuiltins = meta && Array.isArray(meta.builtins) ? meta.builtins.filter((id) => typeof id === 'string') : [];
+    if (meta && Array.isArray(meta.order)) metaInCloud = metaKey(meta.order, remoteBuiltins);
 
     const known = knownIds();
     App.mergeLists((local) => {
@@ -86,7 +91,14 @@
       });
       // Listen, die es nur hier gibt: neu angelegt, solange die Cloud nicht
       // erreichbar war. Früher gesicherte Listen wurden woanders gelöscht.
-      const fresh = local.filter((l) => !remote.has(l.id) && !known.has(l.id) && l.id !== 'beispiel');
+      // Eingebaute Listen, die schon einmal in der Cloud waren und dort
+      // fehlen, wurden gelöscht und bleiben weg.
+      const fresh = local.filter((l) => !remote.has(l.id) && !known.has(l.id) &&
+        l.id !== 'beispiel' && remoteBuiltins.indexOf(l.id) === -1);
+      const builtins = App.getData().builtins;
+      remoteBuiltins.forEach((id) => {
+        if (builtins.indexOf(id) === -1) builtins.push(id);
+      });
       return fresh.concat(result);
     });
     schedule(0);
@@ -127,9 +139,10 @@
         await col.doc('list-' + id).delete();
         inCloud.delete(id);
       }
-      const order = lists.map((l) => l.id).join(',');
+      const builtins = App.getData().builtins.slice();
+      const order = metaKey(lists.map((l) => l.id), builtins);
       if (order !== metaInCloud) {
-        await col.doc('meta').set({ order: lists.map((l) => l.id), updated: Date.now() });
+        await col.doc('meta').set({ order: lists.map((l) => l.id), builtins, updated: Date.now() });
         metaInCloud = order;
       }
       rememberIds();

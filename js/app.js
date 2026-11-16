@@ -98,29 +98,30 @@
 
   // ------------------------------------------------------------------ Daten
 
-  let data = Store.load() || { version: 1, seeded: false, lists: [] };
-  if (!data.seeded && data.lists.length === 0) {
-    data.lists.push(exampleList());
-    data.seeded = true;
-    Store.save(data);
-  }
+  let data = Store.load() || { version: 1, seeded: false, builtins: [], lists: [] };
+  data.seeded = true;
+  if (addBuiltins(data)) Store.save(data);
 
-  function exampleList() {
-    const words = [
-      ['house', 'das Haus'], ['to borrow', 'sich etwas ausleihen'], ['although', 'obwohl'],
-      ['neighbour', 'der Nachbar, die Nachbarin'], ['knowledge', 'das Wissen'],
-      ['environment', 'die Umwelt'], ['to improve', 'verbessern'], ['advice', 'der Rat'],
-      ['thunderstorm', 'das Gewitter'], ['to look forward to sth', 'sich auf etwas freuen'],
-      ['necessary', 'notwendig'], ['experience', 'die Erfahrung'],
-    ];
-    const now = Date.now();
-    return {
-      id: 'beispiel',
-      name: 'Beispielliste zum Ausprobieren',
-      created: now,
-      updated: now,
-      words: words.map((w, i) => ({ id: 'bsp' + i, en: w[0], de: w[1], hard: i === 3 || i === 8 })),
-    };
+  // Legt eingebaute Listen an, die es in diesem Browser noch nie gab.
+  // Gibt zurück, ob etwas hinzugekommen ist.
+  function addBuiltins(target) {
+    let added = false;
+    (window.VokabelBuiltins || []).slice().reverse().forEach((b) => {
+      if (target.builtins.indexOf(b.id) !== -1) return;
+      target.builtins.push(b.id);
+      if (target.lists.some((l) => l.id === b.id)) return;
+      // updated: 0 = unverändert. Eine gespeicherte Fassung (z. B. mit
+      // Sternen) in der Cloud ist immer neuer und gewinnt beim Abgleich.
+      target.lists.unshift({
+        id: b.id,
+        name: b.name,
+        created: Date.now(),
+        updated: 0,
+        words: b.words.map((w, i) => ({ id: b.id + '-' + i, en: w[0], de: w[1], hard: false })),
+      });
+      added = true;
+    });
+    return added;
   }
 
   function findList(id) {
